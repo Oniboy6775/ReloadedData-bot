@@ -37,7 +37,7 @@ router.post("/webhook", async (req, res) => {
       // console.log({ changes });
       // console.log({ value });
       // console.log(value.messages);
-      console.log(value?.contacts[0]?.profile.name);
+      // console.log(value?.contacts[0]?.profile.name);
       // console.log(value.metadata);
       let senderName =
         value?.contacts[0]?.profile.name || message?.from || "Customer";
