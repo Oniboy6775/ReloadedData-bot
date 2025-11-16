@@ -13,7 +13,8 @@ const {
   sendInteractiveButtons,
   sendInteractiveList,
 } = require("../utils/whatsappHelper");
-const { BUSINESS_NAME, BUSINESS_WEBSITE, BOT_EMAIL } = process.env;
+const { BUSINESS_NAME, BUSINESS_WEBSITE, BUSINESS_CHANNEL, BOT_EMAIL } =
+  process.env;
 class ConversationController {
   async handleMessage(
     from,
@@ -126,7 +127,7 @@ class ConversationController {
   }
 
   async handleStart(from, conversation, senderName) {
-    let WELCOME_MESSAGE = `Hello ${senderName},\n\nWelcome to *${BUSINESS_NAME}* 🎉\n\nWhat would you like to purchase today?  \n\n*Official Website*\n_${BUSINESS_WEBSITE}_`;
+    let WELCOME_MESSAGE = `Hello ${senderName},\n\nWelcome to *${BUSINESS_NAME}* 🎉\n\nWhat would you like to purchase today?  \n\n*Official Website*\n_${BUSINESS_WEBSITE}_ \n\n*Support channel*\n\n${BUSINESS_CHANNEL}`;
 
     const buttons = [
       {
