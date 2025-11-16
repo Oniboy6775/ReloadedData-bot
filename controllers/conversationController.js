@@ -19,7 +19,8 @@ class ConversationController {
     from,
     messageBody,
     messageType = "text",
-    buttonId = null
+    buttonId = null,
+    senderName
   ) {
     try {
       // Save or update user
@@ -44,7 +45,7 @@ class ConversationController {
       // Route to appropriate handler based on current step
       switch (conversation.currentStep) {
         case "START":
-          await this.handleStart(from, conversation);
+          await this.handleStart(from, conversation, senderName);
           break;
 
         case "SERVICE_TYPE":
@@ -64,7 +65,12 @@ class ConversationController {
           break;
 
         case "PAYMENT":
-          await this.handlePaymentConfirmation(from, conversation, userInput);
+          await this.handlePaymentConfirmation(
+            from,
+            conversation,
+            userInput,
+            senderName
+          );
           break;
 
         default:
@@ -117,8 +123,8 @@ class ConversationController {
     }
   }
 
-  async handleStart(from, conversation) {
-    let WELCOME_MESSAGE = `Welcome to *${BUSINESS_NAME}* 🎉\n\nWhat would you like to purchase today?  \n\n*Official Website*\n_${BUSINESS_WEBSITE}_`;
+  async handleStart(from, conversation, senderName) {
+    let WELCOME_MESSAGE = `Hello ${senderName},\n\nWelcome to *${BUSINESS_NAME}* 🎉\n\nWhat would you like to purchase today?  \n\n*Official Website*\n_${BUSINESS_WEBSITE}_`;
 
     const buttons = [
       {
@@ -375,7 +381,7 @@ class ConversationController {
     }
   }
 
-  async handlePaymentConfirmation(from, conversation, userInput) {
+  async handlePaymentConfirmation(from, conversation, userInput, senderName) {
     const input = userInput.toUpperCase();
 
     if (input === "PAID" || input === "DONE" || input === "CONFIRMED") {
@@ -436,7 +442,8 @@ class ConversationController {
         if (!status) {
           await sendWhatsAppMessage(
             from,
-            msg || "❌ Error processing your order. Please contact support."
+            `Congratulation 🫵 ${senderName}\n` + msg ||
+              "❌ Error processing your order. Please contact support."
           );
           return;
         } else {
