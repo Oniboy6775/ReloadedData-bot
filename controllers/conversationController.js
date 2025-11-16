@@ -13,7 +13,7 @@ const {
   sendInteractiveButtons,
   sendInteractiveList,
 } = require("../utils/whatsappHelper");
-
+const { BUSINESS_NAME, BUSINESS_WEBSITE, BOT_EMAIL } = process.env;
 class ConversationController {
   async handleMessage(
     from,
@@ -24,7 +24,6 @@ class ConversationController {
     try {
       // Save or update user
       await this.saveUser(from);
-
       // Get or create conversation state
       let conversation = await Conversation.findOne({ phoneNumber: from });
 
@@ -119,6 +118,8 @@ class ConversationController {
   }
 
   async handleStart(from, conversation) {
+    let WELCOME_MESSAGE = `Welcome to *${BUSINESS_NAME}* 🎉\n\nWhat would you like to purchase today?  \n\n*Official Website*\n_${BUSINESS_WEBSITE}_`;
+
     const buttons = [
       {
         type: "reply",
@@ -136,11 +137,7 @@ class ConversationController {
       },
     ];
 
-    await sendInteractiveButtons(
-      from,
-      "Welcome to Data & Airtime Store! 🎉\n\nWhat would you like to purchase today?",
-      buttons
-    );
+    await sendInteractiveButtons(from, WELCOME_MESSAGE, buttons);
 
     conversation.currentStep = "SERVICE_TYPE";
     await conversation.save();
@@ -156,7 +153,7 @@ class ConversationController {
     } else {
       await sendWhatsAppMessage(
         from,
-        "Please select a valid option: Reply 1 for Data or 2 for Airtime"
+        "☹️ Please select a valid option: Reply 1 for Data or 2 for Airtime"
       );
       return;
     }
@@ -312,7 +309,7 @@ class ConversationController {
       const { status, paymentUrl, transactionReference } =
         await initiatePayment({
           paymentReference: paymentRef,
-          email: "onisabiabdullahi@gmail.com",
+          email: BOT_EMAIL,
           description: `${conversation.serviceType} purchase`,
           amount: plan.price,
           phoneNumber: from,
@@ -353,19 +350,19 @@ class ConversationController {
         `Network: ${conversation.network}\n` +
         `Number: ${conversation.recipientNumber}\n` +
         `Plan: ${plan.name}\n` +
-        `Amount: ₦${plan.price.toLocaleString()}\n\n` +
-        `━━━━━━━━━━━━━━━━━━\n\n` +
+        `Amount: ₦${plan.price.toLocaleString()}\n` +
+        `━━━━━━━━━━━━━━━━━━\n` +
         `💳 *PAYMENT DETAILS*\n\n` +
         `Bank: ${bankName}\n` +
         `Account Number: ${accountNumber}\n` +
         `Account Name: ${accountName}\n\n` +
         `Reference: ${paymentRef}\n\n` +
-        `Transaction Ref: ${transactionReference}\n\n` +
-        `USSD Code for payment: ${ussdCode}\n\n` +
-        `━━━━━━━━━━━━━━━━━━\n\n` +
+        `Transaction Ref: ${transactionReference}\n` +
+        `━━━━━━━━━━━━━━━━━━\n` +
         `⚠️ *IMPORTANT:*\n` +
+        `Make payment of ₦${plan.price.toLocaleString()} to the account details above.\n\n` +
         `After payment, reply with "PAID" to confirm.\n\n` +
-        `This order expires in 30 minutes. or click the link below to pay online:\n` +
+        `This order expires in 30 minutes ⏰.\n\n You can also click the link below to pay online:\n` +
         `${paymentUrl}`;
 
       await sendWhatsAppMessage(from, paymentMessage);
@@ -435,7 +432,6 @@ class ConversationController {
           planId: planId.providerCode,
           phoneNumber: conversation.recipientNumber,
         });
-        console.log({ status, msg });
 
         if (!status) {
           await sendWhatsAppMessage(

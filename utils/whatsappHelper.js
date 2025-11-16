@@ -117,6 +117,9 @@ async function markAsRead(messageId) {
         messaging_product: "whatsapp",
         status: "read",
         message_id: messageId,
+        typing_indicator: {
+          type: "text",
+        },
       },
       {
         headers: {

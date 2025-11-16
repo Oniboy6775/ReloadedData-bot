@@ -1,11 +1,18 @@
 const axios = require("axios");
 require("dotenv");
-const {
-  MONNIFY_URL_LIVE,
-  MONNIFY_CONTRACT_CODE_LIVE,
-  MONNIFY_API_ENCODED_LIVE,
-} = process.env;
-
+// const {
+//   MONNIFY_URL_LIVE,
+//   MONNIFY_CONTRACT_CODE_LIVE,
+//   MONNIFY_API_ENCODED_LIVE,
+// } = process.env;
+let MONNIFY_URL_LIVE = process.env.MONNIFY_URL_LIVE;
+let MONNIFY_CONTRACT_CODE_LIVE = process.env.MONNIFY_CONTRACT_CODE_LIVE;
+let MONNIFY_API_ENCODED_LIVE = process.env.MONNIFY_API_ENCODED_LIVE;
+if (process.env.NODE_ENV !== "production") {
+  MONNIFY_URL_LIVE = process.env.MONNIFY_URL_TEST;
+  MONNIFY_CONTRACT_CODE_LIVE = process.env.MONNIFY_CONTRACT_CODE_TEST;
+  MONNIFY_API_ENCODED_LIVE = process.env.MONNIFY_API_ENCODED_TEST;
+}
 //get access token function from monnify
 const getAccessToken = async () => {
   const options = {
@@ -112,6 +119,8 @@ const getPaymentStatus = async (transactionReference) => {
 
   try {
     const { data } = await axios.request(options);
+    // console.log(data.responseBody.paymentSessionDTOs);
+
     return {
       status: data.requestSuccessful,
       paymentStatus: data.responseBody.paymentStatus,
