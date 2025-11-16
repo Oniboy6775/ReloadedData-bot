@@ -32,7 +32,11 @@ router.post("/webhook", async (req, res) => {
       const entry = body.entry[0];
       const changes = entry.changes[0];
       const value = changes.value;
-
+      console.log({ body });
+      console.log({ entry });
+      console.log({ changes });
+      console.log({ value });
+      console.log(value.messages);
       if (value.messages && value.messages[0]) {
         const message = value.messages[0];
         const from = message.from;
