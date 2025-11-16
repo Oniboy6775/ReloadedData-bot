@@ -24,7 +24,7 @@ class ConversationController {
   ) {
     try {
       // Save or update user
-      await this.saveUser(from);
+      await this.saveUser({ phoneNumber: from, senderName });
       // Get or create conversation state
       let conversation = await Conversation.findOne({ phoneNumber: from });
 
@@ -85,18 +85,20 @@ class ConversationController {
     }
   }
 
-  async saveUser(phoneNumber) {
+  async saveUser({ phoneNumber, senderName }) {
     try {
       const user = await User.findOne({ phoneNumber });
 
       if (user) {
         user.lastInteraction = new Date();
         user.isActive = true;
+        user.name = senderName;
         await user.save();
       } else {
         await User.create({
           phoneNumber,
           isActive: true,
+          name: senderName,
           lastInteraction: new Date(),
         });
         console.log(`✅ New user saved: ${phoneNumber}`);
