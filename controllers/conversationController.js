@@ -186,7 +186,7 @@ class ConversationController {
       const sections = [
         {
           title: `Wifi Locations`,
-          rows: [{ id: "malete", title: "Malete(Al-Hibana)" }],
+          rows: [{ id: "malete", title: "Malete(Al-Ibanah)" }],
         },
       ];
 
