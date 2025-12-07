@@ -42,7 +42,10 @@ class ConversationController {
 
       // Handle button response if it's an interactive message
       const userInput = buttonId || messageBody.trim();
-
+      if (userInput.toLowerCase() === "restart") {
+        conversation.currentStep = "START";
+        await conversation.save();
+      }
       // Route to appropriate handler based on current step
       switch (conversation.currentStep) {
         case "START":
