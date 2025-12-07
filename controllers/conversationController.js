@@ -251,7 +251,7 @@ class ConversationController {
       { plan: "2GB", price: 350, validity: "30 days", id: "plan2" },
       { plan: "3GB", price: 500, validity: "30 days", id: "plan3" },
       { plan: "10GB", price: 1200, validity: "30 days", id: "plan4" },
-      { plan: "20GB", price: 1200, validity: "30 days", id: "plan5" },
+      { plan: "20GB", price: 2000, validity: "30 days", id: "plan5" },
       { plan: "1HR", price: 1500, validity: "30 days", id: "plan6" },
     ];
     const sections = [
@@ -368,7 +368,7 @@ class ConversationController {
       { plan: "2GB", price: 350, validity: "30 days", id: "plan2" },
       { plan: "3GB", price: 500, validity: "30 days", id: "plan3" },
       { plan: "10GB", price: 1200, validity: "30 days", id: "plan4" },
-      { plan: "20GB", price: 1200, validity: "30 days", id: "plan5" },
+      { plan: "20GB", price: 2000, validity: "30 days", id: "plan5" },
       { plan: "1HR", price: 1500, validity: "30 days", id: "plan6" },
     ];
     if (conversation.serviceType === "WIFI") {
