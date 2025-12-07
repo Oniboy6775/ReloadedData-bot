@@ -13,6 +13,7 @@ const conversationSchema = new mongoose.Schema(
       enum: [
         "START",
         "SERVICE_TYPE",
+        "LOCATION_SELECTION",
         "NETWORK",
         "PHONE_NUMBER",
         "PLAN_SELECTION",
@@ -24,7 +25,7 @@ const conversationSchema = new mongoose.Schema(
     },
     serviceType: {
       type: String,
-      enum: ["DATA", "AIRTIME"],
+      enum: ["DATA", "AIRTIME", "WIFI"],
     },
     network: {
       type: String,
@@ -34,6 +35,11 @@ const conversationSchema = new mongoose.Schema(
     selectedPlan: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Plan",
+    },
+    selectedWifiPlan: String,
+    wifiLocation: {
+      type: String,
+      enum: ["malete"],
     },
     amount: Number,
     paymentReference: String,

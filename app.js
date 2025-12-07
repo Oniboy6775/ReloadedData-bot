@@ -44,6 +44,7 @@ mongoose
 //ngrok http --url=uncalmative-extranuclear-ingeborg.ngrok-free.dev 5000
 //https://reloadeddata-bot.onrender.com/api/v1/whatsapp/webhook
 //https://uncalmative-extranuclear-ingeborg.ngrok-free.dev/api/v1/whatsapp/webhook
+//https://reloadeddata-bot.onrender.com/api/v1/whatsapp/webhook
 app.get("/", (req, res) => {
   res.send("WhatsApp Webhook is running.");
 });

@@ -1,6 +1,8 @@
 //create a class purchaseHelper that have different methods to handle purchase logic like buyData,buyAirtime etc
 require("dotenv").config();
 const axios = require("axios");
+const Voucher = require("../models/Voucher");
+
 const { SUPPLIER_API, SUPPLIER_API_KEY } = process.env;
 const handlePurchase = async ({
   network,
@@ -8,6 +10,8 @@ const handlePurchase = async ({
   planId,
   phoneNumber,
   serviceType,
+  wifiLocation,
+  from,
 }) => {
   console.log({ serviceType, network, amount, planId, phoneNumber });
 
@@ -17,6 +21,8 @@ const handlePurchase = async ({
         return await buyAirtime({ phoneNumber, amount, network });
       case "DATA":
         return await buyData({ phoneNumber, network, amount, planId });
+      case "WIFI":
+        return await purchaseWifiVoucher({ planId, wifiLocation, from });
       default:
         break;
     }
@@ -76,5 +82,28 @@ const buyAirtime = async ({ phoneNumber, amount, network }) => {
     return response;
   }
 };
+const purchaseWifiVoucher = async ({ planId, wifiLocation, from }) => {
+  //logic to purchase wifi voucher
+  let response = { status: false, msg: "WiFi voucher purchase failed" };
+  console.log({ planId, wifiLocation, from });
 
+  try {
+    const voucher = await Voucher.findOneAndUpdate(
+      { profileName: planId, voucherLocation: wifiLocation, used: false },
+      { used: true, usedBy: from, usedAt: new Date() },
+      { new: true }
+    );
+    console.log({ voucher });
+    if (voucher) {
+      response.status = true;
+      response.msg = `VOUCHER: *${voucher.voucherCode}*`;
+    } else {
+      response.msg = "No available vouchers for the selected plan";
+    }
+    return response;
+  } catch (error) {
+    response.msg = error.message;
+    return response;
+  }
+};
 module.exports = { handlePurchase };

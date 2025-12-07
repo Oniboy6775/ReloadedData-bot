@@ -53,6 +53,9 @@ class ConversationController {
           await this.handleServiceType(from, conversation, userInput);
           break;
 
+        case "LOCATION_SELECTION":
+          await this.handleLocationSelection(from, conversation, userInput);
+          break;
         case "NETWORK":
           await this.handleNetwork(from, conversation, userInput);
           break;
@@ -144,6 +147,13 @@ class ConversationController {
           title: "💳 Airtime",
         },
       },
+      {
+        type: "reply",
+        reply: {
+          id: "WIFI",
+          title: "🛜 Wifi voucher",
+        },
+      },
     ];
 
     await sendInteractiveButtons(from, WELCOME_MESSAGE, buttons);
@@ -159,40 +169,110 @@ class ConversationController {
       conversation.serviceType = "DATA";
     } else if (input === "AIRTIME" || input === "2") {
       conversation.serviceType = "AIRTIME";
+    } else if (input === "WIFI" || input === "3") {
+      conversation.serviceType = "WIFI";
     } else {
       await sendWhatsAppMessage(
         from,
-        "☹️ Please select a valid option: Reply 1 for Data or 2 for Airtime"
+        "☹️ Please select a valid option: Reply *1* for Data , *2* for Airtime or *3* for wifi voucher"
       );
       return;
     }
 
     await conversation.save();
+    // if conversation service type is wifi , allow to select wifi location as the network
 
-    const buttons = [
+    if (conversation.serviceType === "WIFI") {
+      const sections = [
+        {
+          title: `Wifi Locations`,
+          rows: [{ id: "malete", title: "Malete(Al-Hibana)" }],
+        },
+      ];
+
+      await sendInteractiveList(
+        from,
+        `Great! You selected ${conversation.serviceType}.\n\nWhich wifi Location?`,
+        "View Wifi Locations",
+        sections
+      );
+
+      conversation.currentStep = "LOCATION_SELECTION";
+      await conversation.save();
+      return;
+    } else {
+      const buttons = [
+        {
+          type: "reply",
+          reply: { id: "MTN", title: "MTN" },
+        },
+        {
+          type: "reply",
+          reply: { id: "AIRTEL", title: "Airtel" },
+        },
+        {
+          type: "reply",
+          reply: { id: "GLO", title: "Glo" },
+        },
+      ];
+
+      await sendInteractiveButtons(
+        from,
+        `Great! You selected ${conversation.serviceType}.\n\nWhich network provider?`,
+        buttons
+      );
+
+      await sendWhatsAppMessage(from, 'Or reply "4" for 9Mobile');
+
+      conversation.currentStep = "NETWORK";
+      await conversation.save();
+    }
+  }
+  async handleLocationSelection(from, conversation, userInput) {
+    const input = userInput.toLowerCase();
+    const locationMap = {
+      malete: "malete",
+      1: "malete",
+    };
+    console.log(conversation.currentStep);
+
+    const location = locationMap[input];
+
+    if (!location) {
+      await sendWhatsAppMessage(
+        from,
+        "Please select a valid wifi location: Malete"
+      );
+      return;
+    }
+
+    const availableWifiPlans = [
+      { plan: "1GB", price: 200, validity: "30 days", id: "plan1" },
+      { plan: "2GB", price: 350, validity: "30 days", id: "plan2" },
+      { plan: "3GB", price: 500, validity: "30 days", id: "plan3" },
+      { plan: "10GB", price: 1200, validity: "30 days", id: "plan4" },
+      { plan: "20GB", price: 1200, validity: "30 days", id: "plan5" },
+      { plan: "1HR", price: 1500, validity: "30 days", id: "plan6" },
+    ];
+    const sections = [
       {
-        type: "reply",
-        reply: { id: "MTN", title: "MTN" },
-      },
-      {
-        type: "reply",
-        reply: { id: "AIRTEL", title: "Airtel" },
-      },
-      {
-        type: "reply",
-        reply: { id: "GLO", title: "Glo" },
+        title: `Voucher at ${location}`,
+        rows: availableWifiPlans.map((plan) => ({
+          id: plan.id,
+          title: `${plan.plan} - ₦${plan.price.toLocaleString()}`,
+          description: `Validity: ${plan.validity}`,
+        })),
       },
     ];
 
-    await sendInteractiveButtons(
+    await sendInteractiveList(
       from,
-      `Great! You selected ${conversation.serviceType}.\n\nWhich network provider?`,
-      buttons
+      `Great! Location confirmed: ${location}\n\nSelect your preferred wifi plan:`,
+      "View Wifi Plans",
+      sections
     );
-
-    await sendWhatsAppMessage(from, 'Or reply "4" for 9Mobile');
-
-    conversation.currentStep = "NETWORK";
+    conversation.wifiLocation = location?.toLowerCase();
+    conversation.currentStep = "PLAN_SELECTION";
     await conversation.save();
   }
 
@@ -283,44 +363,54 @@ class ConversationController {
   }
 
   async handlePlanSelection(from, conversation, userInput) {
-    try {
-      const plan = await Plan.findById(userInput);
+    const availableWifiPlans = [
+      { plan: "1GB", price: 200, validity: "30 days", id: "plan1" },
+      { plan: "2GB", price: 350, validity: "30 days", id: "plan2" },
+      { plan: "3GB", price: 500, validity: "30 days", id: "plan3" },
+      { plan: "10GB", price: 1200, validity: "30 days", id: "plan4" },
+      { plan: "20GB", price: 1200, validity: "30 days", id: "plan5" },
+      { plan: "1HR", price: 1500, validity: "30 days", id: "plan6" },
+    ];
+    if (conversation.serviceType === "WIFI") {
+      const selectedPlan = availableWifiPlans.find(
+        (plan) => plan.id === userInput.toLowerCase()
+      );
+      console.log(selectedPlan);
 
-      if (!plan) {
+      if (!selectedPlan) {
         await sendWhatsAppMessage(
           from,
           "Invalid plan selection. Please select from the list."
         );
         return;
       }
-
-      conversation.selectedPlan = plan._id;
-      conversation.amount = plan.price;
+      conversation.selectedWifiPlan = selectedPlan.plan;
+      conversation.amount = selectedPlan.price;
+      await conversation.save();
+      conversation.currentStep = "PAYMENT";
       await conversation.save();
 
       const paymentRef = `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
       await Transaction.create({
         userPhone: from,
-        serviceType: conversation.serviceType,
-        network: conversation.network,
-        recipientNumber: conversation.recipientNumber,
-        plan: plan._id,
-        amount: plan.price,
+        serviceType: "AIRTIME" || conversation.serviceType,
+        network: conversation.wifiLocation,
+        recipientNumber: from,
+        amount: selectedPlan?.price,
         paymentReference: paymentRef,
         status: "PENDING",
       });
 
       conversation.paymentReference = paymentRef;
-      conversation.currentStep = "PAYMENT";
       await conversation.save();
       // Initiate payment
       const { status, paymentUrl, transactionReference } =
         await initiatePayment({
           paymentReference: paymentRef,
           email: BOT_EMAIL,
-          description: `${conversation.serviceType} purchase`,
-          amount: plan.price,
+          description: `${conversation.serviceType} voucher purchase`,
+          amount: selectedPlan.price,
           phoneNumber: from,
         });
       if (!status) {
@@ -356,10 +446,9 @@ class ConversationController {
       const paymentMessage =
         `📋 *ORDER SUMMARY*\n\n` +
         `Service: ${conversation.serviceType}\n` +
-        `Network: ${conversation.network}\n` +
-        `Number: ${conversation.recipientNumber}\n` +
-        `Plan: ${plan.name}\n` +
-        `Amount: ₦${plan.price.toLocaleString()}\n` +
+        `Number: ${from}\n` +
+        `Plan: ${selectedPlan.plan}\n` +
+        `Amount: ₦${selectedPlan.price.toLocaleString()}\n` +
         `━━━━━━━━━━━━━━━━━━\n` +
         `💳 *PAYMENT DETAILS*\n\n` +
         `Bank: ${bankName}\n` +
@@ -369,18 +458,114 @@ class ConversationController {
         `Transaction Ref: ${transactionReference}\n` +
         `━━━━━━━━━━━━━━━━━━\n` +
         `⚠️ *IMPORTANT:*\n` +
-        `Make payment of ₦${plan.price.toLocaleString()} to the account details above.\n\n` +
+        `Make payment of ₦${selectedPlan.price.toLocaleString()} to the account details above.\n\n` +
         `After payment, reply with "PAID" to confirm.\n\n` +
         `This order expires in 30 minutes ⏰.\n\n You can also click the link below to pay online:\n` +
         `${paymentUrl}`;
 
       await sendWhatsAppMessage(from, paymentMessage);
-    } catch (error) {
-      console.error("❌ Error in plan selection:", error);
-      await sendWhatsAppMessage(
-        from,
-        "Error processing your selection. Please try again."
-      );
+    } else {
+      try {
+        const plan = await Plan.findById(userInput);
+
+        if (!plan) {
+          await sendWhatsAppMessage(
+            from,
+            "Invalid plan selection. Please select from the list."
+          );
+          return;
+        }
+
+        conversation.selectedPlan = plan._id;
+        conversation.amount = plan.price;
+        await conversation.save();
+
+        const paymentRef = `TXN${Date.now()}${Math.floor(
+          Math.random() * 1000
+        )}`;
+
+        await Transaction.create({
+          userPhone: from,
+          serviceType: conversation.serviceType,
+          network: conversation.network,
+          recipientNumber: conversation.recipientNumber,
+          plan: plan._id,
+          amount: plan.price,
+          paymentReference: paymentRef,
+          status: "PENDING",
+        });
+
+        conversation.paymentReference = paymentRef;
+        conversation.currentStep = "PAYMENT";
+        await conversation.save();
+        // Initiate payment
+        const { status, paymentUrl, transactionReference } =
+          await initiatePayment({
+            paymentReference: paymentRef,
+            email: BOT_EMAIL,
+            description: `${conversation.serviceType} purchase`,
+            amount: plan.price,
+            phoneNumber: from,
+          });
+        if (!status) {
+          conversation.currentStep = "START";
+          await conversation.save();
+          await sendWhatsAppMessage(
+            from,
+            "❌ Error initiating payment. Please try again later."
+          );
+          return;
+        }
+        conversation.paymentGatewayReference = transactionReference;
+        conversation.save();
+        // get account details
+        const {
+          status: accountStatus,
+          accountNumber,
+          accountName,
+          bankName,
+          ussdCode,
+        } = await getPaymentAccountDetails(transactionReference);
+        if (!accountStatus) {
+          conversation.currentStep = "START";
+          await conversation.save();
+          await sendWhatsAppMessage(
+            from,
+            "❌ Error retrieving payment details. Please try again later."
+          );
+          return;
+        }
+
+        // Send payment details to user or payment url
+        const paymentMessage =
+          `📋 *ORDER SUMMARY*\n\n` +
+          `Service: ${conversation.serviceType}\n` +
+          `Network: ${conversation.network}\n` +
+          `Number: ${conversation.recipientNumber}\n` +
+          `Plan: ${plan.name}\n` +
+          `Amount: ₦${plan.price.toLocaleString()}\n` +
+          `━━━━━━━━━━━━━━━━━━\n` +
+          `💳 *PAYMENT DETAILS*\n\n` +
+          `Bank: ${bankName}\n` +
+          `Account Number: ${accountNumber}\n` +
+          `Account Name: ${accountName}\n\n` +
+          `Reference: ${paymentRef}\n\n` +
+          `Transaction Ref: ${transactionReference}\n` +
+          `━━━━━━━━━━━━━━━━━━\n` +
+          `⚠️ *IMPORTANT:*\n` +
+          `Make payment of ₦${plan.price.toLocaleString()} to the account details above.\n\n` +
+          `After payment, reply with "PAID" to confirm.\n\n` +
+          `This order expires in 30 minutes ⏰.\n\n You can also click the link below to pay online:\n` +
+          `${paymentUrl}`;
+
+        await sendWhatsAppMessage(from, paymentMessage);
+      } catch (error) {
+        console.error("❌ Error in plan selection:", error);
+        await sendWhatsAppMessage(
+          from,
+          "Error processing your selection. Please try again."
+        );
+      }
     }
   }
 
@@ -436,10 +621,15 @@ class ConversationController {
         let planId = await Plan.findById(conversation.selectedPlan);
         const { status, msg } = await handlePurchase({
           serviceType: conversation.serviceType,
-          network: conversation.network,
+          network: conversation?.network,
           amount: conversation.amount,
-          planId: planId.providerCode,
+          planId:
+            conversation.serviceType == "WIFI"
+              ? conversation.selectedWifiPlan
+              : planId?.providerCode,
           phoneNumber: conversation.recipientNumber,
+          wifiLocation: conversation.wifiLocation,
+          from,
         });
 
         if (!status) {

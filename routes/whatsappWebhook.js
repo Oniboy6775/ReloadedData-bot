@@ -32,13 +32,6 @@ router.post("/webhook", async (req, res) => {
       const entry = body.entry[0];
       const changes = entry.changes[0];
       const value = changes.value;
-      // console.log({ body });
-      // console.log({ entry });
-      // console.log({ changes });
-      // console.log({ value });
-      // console.log(value.messages);
-      // console.log(value?.contacts[0]?.profile.name);
-      // console.log(value.metadata);
       if (value.messages && value.messages[0]) {
         let senderName = "Customer";
         if (value?.contacts[0]?.profile.name) {

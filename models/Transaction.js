@@ -9,7 +9,7 @@ const transactionSchema = new mongoose.Schema(
     },
     serviceType: {
       type: String,
-      enum: ["DATA", "AIRTIME"],
+      enum: ["DATA", "AIRTIME", " WIFI"],
       required: true,
     },
     network: {
