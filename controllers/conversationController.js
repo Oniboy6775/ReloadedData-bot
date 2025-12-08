@@ -447,17 +447,14 @@ class ConversationController {
 
       // Send payment details to user or payment url
       const paymentMessage =
+        `💳 *PAYMENT DETAILS*\n\n` +
+        `Bank: ${bankName}\n` +
+        `Account Number: ${accountNumber}\n` +
+        `Account Name: ${accountName}\n` +
         `📋 *ORDER SUMMARY*\n\n` +
         `Service: ${conversation.serviceType}\n` +
         `Plan: ${selectedPlan.plan}\n` +
         `Amount: ₦${selectedPlan.price.toLocaleString()}\n` +
-        `━━━━━━━━━━━━━━━━━━\n` +
-        `💳 *PAYMENT DETAILS*\n\n` +
-        `Bank: ${bankName}\n` +
-        `Account Number: ${accountNumber}\n` +
-        `Account Name: ${accountName}\n\n` +
-        `Reference: ${paymentRef}\n\n` +
-        `Transaction Ref: ${transactionReference}\n` +
         `━━━━━━━━━━━━━━━━━━\n` +
         `⚠️ *IMPORTANT:*\n` +
         `Make payment of ₦${selectedPlan.price.toLocaleString()} to the account details above.\n\n` +
@@ -540,6 +537,11 @@ class ConversationController {
 
         // Send payment details to user or payment url
         const paymentMessage =
+          `💳 *PAYMENT DETAILS*\n\n` +
+          `Bank: ${bankName}\n` +
+          `Account Number: ${accountNumber}\n` +
+          `Account Name: ${accountName}\n` +
+          `Transaction Ref: ${transactionReference}\n` +
           `📋 *ORDER SUMMARY*\n\n` +
           `Service: ${conversation.serviceType}\n` +
           `Network: ${conversation.network}\n` +
@@ -547,15 +549,8 @@ class ConversationController {
           `Plan: ${plan.name}\n` +
           `Amount: ₦${plan.price.toLocaleString()}\n` +
           `━━━━━━━━━━━━━━━━━━\n` +
-          `💳 *PAYMENT DETAILS*\n\n` +
-          `Bank: ${bankName}\n` +
-          `Account Number: ${accountNumber}\n` +
-          `Account Name: ${accountName}\n\n` +
-          `Reference: ${paymentRef}\n\n` +
-          `Transaction Ref: ${transactionReference}\n` +
-          `━━━━━━━━━━━━━━━━━━\n` +
           `⚠️ *IMPORTANT:*\n` +
-          `Make payment of ₦${plan.price.toLocaleString()} to the account details above.\n\n` +
+          `Make payment of ₦${plan.price.toLocaleString()} to the account details above.\n` +
           `After payment, reply with "PAID" to confirm.\n\n` +
           `This order expires in 30 minutes ⏰.\n\n You can also click the link below to pay online:\n` +
           `${paymentUrl}`;
