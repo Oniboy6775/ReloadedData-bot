@@ -96,7 +96,7 @@ const purchaseWifiVoucher = async ({ planId, wifiLocation, from }) => {
     console.log({ voucher });
     if (voucher) {
       response.status = true;
-      response.msg = `VOUCHER: *${voucher.voucherCode}*`;
+      response.msg = `*${voucher.voucherCode}*`;
     } else {
       response.msg = "No available vouchers for the selected plan";
     }

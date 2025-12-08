@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Voucher = require("./models/Voucher"); // Adjust the path as needed
 require("dotenv").config();
 csv()
-  .fromFile("vouchers/1HR.csv") // the CSV file you want to convert
+  .fromFile("vouchers/20GB.csv") // the CSV file you want to convert
   .then((jsonObj) => {
     const formattedVouchers = jsonObj.map((item) => ({
       voucherCode: item.Username,
@@ -13,7 +13,7 @@ csv()
       voucherLocation: "malete",
     }));
 
-    console.log(formattedVouchers);
+    // console.log(formattedVouchers);
     mongoose
       .connect(process.env.MONGODB_URI, {
         useNewUrlParser: true,

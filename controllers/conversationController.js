@@ -449,7 +449,6 @@ class ConversationController {
       const paymentMessage =
         `📋 *ORDER SUMMARY*\n\n` +
         `Service: ${conversation.serviceType}\n` +
-        `Number: ${from}\n` +
         `Plan: ${selectedPlan.plan}\n` +
         `Amount: ₦${selectedPlan.price.toLocaleString()}\n` +
         `━━━━━━━━━━━━━━━━━━\n` +
@@ -638,7 +637,7 @@ class ConversationController {
         if (!status) {
           await sendWhatsAppMessage(
             from,
-            `Congratulation 🫵 ${senderName}\n` + msg ||
+            `Ops! 🫵 ${senderName}\n` + msg ||
               "❌ Error processing your order. Please contact support."
           );
           return;
@@ -656,17 +655,19 @@ class ConversationController {
             conversation.serviceType,
             conversation.network
           );
-
-          await sendWhatsAppMessage(
-            from,
+          let successMsg =
             `🎉 *Transaction Successful!*\n\n` +
-              `Your ${conversation.serviceType.toLowerCase()} has been delivered to ${
-                conversation.recipientNumber
-              }\n\n` +
-              `Response: ${msg}\n\n` +
-              `Reference: ${conversation.paymentReference}\n\n` +
-              `Type "start" to make another purchase.`
-          );
+            `Your ${conversation.serviceType.toLowerCase()} has been delivered to ${
+              conversation.recipientNumber
+            }\n\n` +
+            `Response: ${msg}\n\n` +
+            `Reference: ${conversation.paymentReference}\n\n` +
+            `Type "start" to make another purchase.`;
+
+          await sendWhatsAppMessage(from, successMsg);
+          if (conversation.serviceType === "WIFI") {
+            await sendWhatsAppMessage(from, msg);
+          }
           await Conversation.deleteOne({ phoneNumber: from });
         }
       } else {
