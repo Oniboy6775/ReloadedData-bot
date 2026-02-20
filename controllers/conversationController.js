@@ -23,9 +23,9 @@ class ConversationController {
     buttonId = null,
     senderName,
   ) {
-    await sendWhatsAppMessage(
+    return await sendWhatsAppMessage(
       from,
-      "AN UPGRADE IS ONGOING! We are currently upgrading our system to serve you better. During this period, all purchases are paused. We apologize for the inconvenience and appreciate your patience. For updates, please follow our official channels:\n\n*Official Website*\n_${BUSINESS_WEBSITE}_ \n\n*Support channel*\n${BUSINESS_CHANNEL}",
+      "AN UPGRADE IS ONGOING! We are currently upgrading our system to serve you better. During this period, all purchases are paused. We apologize for the inconvenience and appreciate your patience. For updates, please follow our official channels:\n\n*Official Website*\n_${BUSINESS_WEBSITE}_ \n\n*Support channel*\n${BUSINESS_CHANNEL}"``,
     );
     try {
       // Save or update user
