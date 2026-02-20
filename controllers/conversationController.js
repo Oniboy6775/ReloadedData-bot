@@ -21,7 +21,7 @@ class ConversationController {
     messageBody,
     messageType = "text",
     buttonId = null,
-    senderName
+    senderName,
   ) {
     try {
       // Save or update user
@@ -76,7 +76,7 @@ class ConversationController {
             from,
             conversation,
             userInput,
-            senderName
+            senderName,
           );
           break;
 
@@ -87,7 +87,7 @@ class ConversationController {
       console.error("❌ Error in conversation handler:", error);
       await sendWhatsAppMessage(
         from,
-        'Sorry, something went wrong. Please type "start" to begin again.'
+        'Sorry, something went wrong. Please type "start" to begin again.',
       );
     }
   }
@@ -125,7 +125,7 @@ class ConversationController {
             "metadata.preferredService": serviceType,
             "metadata.preferredNetwork": network,
           },
-        }
+        },
       );
     } catch (error) {
       console.error("❌ Error updating user stats:", error);
@@ -177,7 +177,7 @@ class ConversationController {
     } else {
       await sendWhatsAppMessage(
         from,
-        "☹️ Please select a valid option: Reply *1* for Data , *2* for Airtime or *3* for wifi voucher"
+        "☹️ Please select a valid option: Reply *1* for Data , *2* for Airtime or *3* for wifi voucher",
       );
       return;
     }
@@ -197,7 +197,7 @@ class ConversationController {
         from,
         `Great! You selected ${conversation.serviceType}.\n\nWhich wifi Location?`,
         "View Wifi Locations",
-        sections
+        sections,
       );
 
       conversation.currentStep = "LOCATION_SELECTION";
@@ -222,7 +222,7 @@ class ConversationController {
       await sendInteractiveButtons(
         from,
         `Great! You selected ${conversation.serviceType}.\n\nWhich network provider?`,
-        buttons
+        buttons,
       );
 
       await sendWhatsAppMessage(from, 'Or reply "4" for 9Mobile');
@@ -244,7 +244,7 @@ class ConversationController {
     if (!location) {
       await sendWhatsAppMessage(
         from,
-        "Please select a valid wifi location: Malete"
+        "Please select a valid wifi location: Malete",
       );
       return;
     }
@@ -272,7 +272,7 @@ class ConversationController {
       from,
       `Great! Location confirmed: ${location}\n\nSelect your preferred wifi plan:`,
       "View Wifi Plans",
-      sections
+      sections,
     );
     conversation.wifiLocation = location?.toLowerCase();
     conversation.currentStep = "PLAN_SELECTION";
@@ -297,7 +297,7 @@ class ConversationController {
     if (!network) {
       await sendWhatsAppMessage(
         from,
-        "Please select a valid network: MTN, Airtel, Glo, or 9Mobile"
+        "Please select a valid network: MTN, Airtel, Glo, or 9Mobile",
       );
       return;
     }
@@ -308,7 +308,7 @@ class ConversationController {
 
     await sendWhatsAppMessage(
       from,
-      `Perfect! ${network} selected.\n\nPlease enter the phone number to receive the ${conversation.serviceType.toLowerCase()}:\n\nExample: 08012345678`
+      `Perfect! ${network} selected.\n\nPlease enter the phone number to receive the ${conversation.serviceType.toLowerCase()}:\n\nExample: 08012345678`,
     );
   }
 
@@ -319,7 +319,7 @@ class ConversationController {
     if (!phoneRegex.test(cleanedNumber)) {
       await sendWhatsAppMessage(
         from,
-        "Invalid phone number format. Please enter a valid Nigerian number:\n\nExample: 08012345678"
+        "Invalid phone number format. Please enter a valid Nigerian number:\n\nExample: 08012345678",
       );
       return;
     }
@@ -337,7 +337,7 @@ class ConversationController {
     if (plans.length === 0) {
       await sendWhatsAppMessage(
         from,
-        "Sorry, no plans available at the moment. Please try again later."
+        "Sorry, no plans available at the moment. Please try again later.",
       );
       conversation.currentStep = "START";
       await conversation.save();
@@ -361,7 +361,7 @@ class ConversationController {
       from,
       `Great! Number confirmed: ${cleanedNumber}\n\nSelect your preferred plan:`,
       "View Plans",
-      sections
+      sections,
     );
   }
 
@@ -376,14 +376,14 @@ class ConversationController {
     ];
     if (conversation.serviceType === "WIFI") {
       const selectedPlan = availableWifiPlans.find(
-        (plan) => plan.id === userInput.toLowerCase()
+        (plan) => plan.id === userInput.toLowerCase(),
       );
       console.log(selectedPlan);
 
       if (!selectedPlan) {
         await sendWhatsAppMessage(
           from,
-          "Invalid plan selection. Please select from the list."
+          "Invalid plan selection. Please select from the list.",
         );
         return;
       }
@@ -421,7 +421,7 @@ class ConversationController {
         await conversation.save();
         await sendWhatsAppMessage(
           from,
-          "❌ Error initiating payment. Please try again later."
+          "❌ Error initiating payment. Please try again later.",
         );
         return;
       }
@@ -440,7 +440,7 @@ class ConversationController {
         await conversation.save();
         await sendWhatsAppMessage(
           from,
-          "❌ Error retrieving payment details. Please try again later."
+          "❌ Error retrieving payment details. Please try again later.",
         );
         return;
       }
@@ -470,7 +470,7 @@ class ConversationController {
         if (!plan) {
           await sendWhatsAppMessage(
             from,
-            "Invalid plan selection. Please select from the list."
+            "Invalid plan selection. Please select from the list.",
           );
           return;
         }
@@ -480,7 +480,7 @@ class ConversationController {
         await conversation.save();
 
         const paymentRef = `TXN${Date.now()}${Math.floor(
-          Math.random() * 1000
+          Math.random() * 1000,
         )}`;
 
         await Transaction.create({
@@ -511,7 +511,7 @@ class ConversationController {
           await conversation.save();
           await sendWhatsAppMessage(
             from,
-            "❌ Error initiating payment. Please try again later."
+            "❌ Error initiating payment. Please try again later.",
           );
           return;
         }
@@ -530,7 +530,7 @@ class ConversationController {
           await conversation.save();
           await sendWhatsAppMessage(
             from,
-            "❌ Error retrieving payment details. Please try again later."
+            "❌ Error retrieving payment details. Please try again later.",
           );
           return;
         }
@@ -560,7 +560,7 @@ class ConversationController {
         console.error("❌ Error in plan selection:", error);
         await sendWhatsAppMessage(
           from,
-          "Error processing your selection. Please try again."
+          "Error processing your selection. Please try again.",
         );
       }
     }
@@ -576,26 +576,26 @@ class ConversationController {
       if (!transaction) {
         await sendWhatsAppMessage(
           from,
-          "Transaction not found. Please contact support."
+          "Transaction not found. Please contact support.",
         );
         return;
       }
       // get transaction status from payment gateway
       const { status, paymentStatus } = await getPaymentStatus(
-        conversation.paymentGatewayReference
+        conversation.paymentGatewayReference,
       );
       // console.log({ paymentStatus, status });
       if (!status) {
         await sendWhatsAppMessage(
           from,
-          "❌ Error checking payment status. Please try again later."
+          "❌ Error checking payment status. Please try again later.",
         );
         return;
       }
       if (paymentStatus !== "PAID") {
         await sendWhatsAppMessage(
           from,
-          "Payment not confirmed yet. Please ensure you have completed the payment and try again."
+          "Payment not confirmed yet. Please ensure you have completed the payment and try again.",
         );
         return;
       }
@@ -609,7 +609,7 @@ class ConversationController {
           `✅ Payment confirmation received!\n\n` +
             `Reference: ${conversation.paymentReference}\n\n` +
             `Your order is being processed. You will receive a confirmation message shortly.\n\n` +
-            `Thank you for using our service! 🎉`
+            `Thank you for using our service! 🎉`,
         );
 
         transaction.status = "PROCESSING";
@@ -633,7 +633,7 @@ class ConversationController {
           await sendWhatsAppMessage(
             from,
             `Ops! 🫵 ${senderName}\n` + msg ||
-              "❌ Error processing your order. Please contact support."
+              "❌ Error processing your order. Please contact support.",
           );
           return;
         } else {
@@ -648,7 +648,7 @@ class ConversationController {
             from,
             conversation.amount,
             conversation.serviceType,
-            conversation.network
+            conversation.network,
           );
           let successMsg =
             `🎉 *Transaction Successful!*\n\n` +
@@ -660,6 +660,15 @@ class ConversationController {
             `Type "start" to make another purchase.`;
 
           await sendWhatsAppMessage(from, successMsg);
+          //if theres a broadcast notification send to user
+          // if (conversation.broadcast) {
+          //   await sendWhatsAppMessage(from, conversation.broadcastMessage);
+          // }
+          await sendWhatsAppMessage(
+            from,
+            "Due to some maintenance work, there will be an increase in price of wifi vouchers by 1st March. Thanks you for your patience and understanding.",
+          );
+
           if (conversation.serviceType === "WIFI") {
             await sendWhatsAppMessage(from, msg);
           }
@@ -668,25 +677,25 @@ class ConversationController {
       } else {
         await sendWhatsAppMessage(
           from,
-          "Transaction not found. Please contact support."
+          "Transaction not found. Please contact support.",
         );
       }
     } else if (input === "CANCEL") {
       await Transaction.updateOne(
         { paymentReference: conversation.paymentReference },
-        { status: "CANCELLED" }
+        { status: "CANCELLED" },
       );
       await Conversation.deleteOne({ phoneNumber: from });
       await sendWhatsAppMessage(
         from,
-        'Order cancelled. Type "start" to begin a new order.'
+        'Order cancelled. Type "start" to begin a new order.',
       );
     } else {
       await sendWhatsAppMessage(
         from,
         `Waiting for payment confirmation...\n\n` +
           `Reply "PAID" after making payment\n` +
-          `Reply "CANCEL" to cancel this order`
+          `Reply "CANCEL" to cancel this order`,
       );
     }
   }

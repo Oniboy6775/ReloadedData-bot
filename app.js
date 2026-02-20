@@ -33,7 +33,7 @@ mongoose
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(
-        `📱 Webhook URL: http://localhost:${PORT}/api/whatsapp/webhook`
+        `📱 Webhook URL: http://localhost:${PORT}/api/whatsapp/webhook`,
       );
     });
   })
